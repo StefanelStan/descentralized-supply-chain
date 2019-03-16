@@ -1,0 +1,11 @@
+{
+  "name": "p6",
+  "version": "1.0.0",
+  "description": "Blockchain supply chain project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stefannel",
+  "license": "ISC"
+}
