@@ -1,6 +1,7 @@
-pragma solidity ^0.4.24;
+pragma solidity >0.4.25;
 
 /// Provides basic authorization control
+/**
 contract Ownable {
     address private origOwner;
 
@@ -47,3 +48,4 @@ contract Ownable {
         origOwner = newOwner;
     }
 }
+*/

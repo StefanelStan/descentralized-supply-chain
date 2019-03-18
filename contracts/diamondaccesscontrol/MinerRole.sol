@@ -1,54 +1,54 @@
-pragma solidity >0.4.25;
+pragma solidity >0.4.24;
 
 // Import the library 'Roles'
 import "./Roles.sol";
 
-// Define a contract 'FarmerRole' to manage this role - add, remove, check
+// Define a contract 'MinerRole' to manage this role - add, remove, check
 contract MinerRole {
     using Roles for Roles.Role;
 
     // Define 2 events, one for Adding, and other for Removing
-    event FarmerAdded(address indexed account);
-    event FarmerRemoved(address indexed account);
+    event MinerAdded(address indexed account);
+    event MinerRemoved(address indexed account);
 
-    // Define a struct 'farmers' by inheriting from 'Roles' library, struct Role
-    Roles.Role private farmers;
+    // Define a struct 'miners' by inheriting from 'Roles' library, struct Role
+    Roles.Role private miners;
 
-    // In the constructor make the address that deploys this contract the 1st farmer
+    // In the constructor make the address that deploys this contract the 1st Miner
     constructor() public {
-        _addFarmer(msg.sender);
+        _addMiner(msg.sender);
     }
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
-    modifier onlyFarmer() {
-        require(isFarmer(msg.sender));
+    modifier onlyMiner() {
+        require(isMiner(msg.sender), "Only a miner can add another miner");
         _;
     }
 
-    // Define a function 'isFarmer' to check this role
-    function isFarmer(address account) public view returns (bool) {
-        return farmers.has(account);
+    // Define a function 'isMiner' to check this role
+    function isMiner(address account) public view returns (bool) {
+        return miners.has(account);
     }
 
-    // Define a function 'addFarmer' that adds this role
-    function addFarmer(address account) public onlyFarmer {
-        _addFarmer(account);
+    // Define a function 'addMiner' that adds this role
+    function addMiner(address account) public onlyMiner {
+        _addMiner(account);
     }
 
-    // Define a function 'renounceFarmer' to renounce this role
-    function renounceFarmer() public {
-        _removeFarmer(msg.sender);
+    // Define a function 'renounceMiner' to renounce this role
+    function renounceMiner() public {
+        _removeMiner(msg.sender);
     }
 
-    // Define an internal function '_addFarmer' to add this role, called by 'addFarmer'
-    function _addFarmer(address account) internal {
-        farmers.add(account);
-        emit FarmerAdded(account);
+    // Define an internal function '_addMiner' to add this role, called by 'addMiner'
+    function _addMiner(address account) internal {
+        miners.add(account);
+        emit MinerAdded(account);
     }
 
-    // Define an internal function '_removeFarmer' to remove this role, called by 'removeFarmer'
-    function _removeFarmer(address account) internal {
-        farmers.remove(account);
-        emit FarmerRemoved(account);
+    // Define an internal function '_removeMiner' to remove this role, called by 'removeMiner'
+    function _removeMiner(address account) internal {
+        miners.remove(account);
+        emit MinerRemoved(account);
     }
 }

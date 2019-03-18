@@ -8,39 +8,39 @@ contract MasterjewelerRole {
 
     // Define 2 events, one for Adding, and other for Removing
     
-    // Define a struct 'retailers' by inheriting from 'Roles' library, struct Role
+    // Define a struct 'Masterjewelers' by inheriting from 'Roles' library, struct Role
 
-    // In the constructor make the address that deploys this contract the 1st retailer
+    // In the constructor make the address that deploys this contract the 1st Masterjeweler
     constructor() public { }
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
-    modifier onlyRetailer() {
+    modifier onlyMasterjeweler() {
     
         _;
     } 
 
-    // Define a function 'isRetailer' to check this role
-    function isRetailer(address account) public view returns (bool) {
+    // Define a function 'isMasterjeweler' to check this role
+    function isMasterjeweler(address account) public view returns (bool) {
         
     }
 
-    // Define a function 'addRetailer' that adds this role
-    function addRetailer(address account) public onlyRetailer {
+    // Define a function 'addMasterjeweler' that adds this role
+    function addMasterjeweler(address account) public onlyMasterjeweler {
         
     }
 
-    // Define a function 'renounceRetailer' to renounce this role
-    function renounceRetailer() public {
+    // Define a function 'renounceMasterjeweler' to renounce this role
+    function renounceMasterjeweler() public {
         
     }
 
-    // Define an internal function '_addRetailer' to add this role, called by 'addRetailer'
-    function _addRetailer(address account) internal {
+    // Define an internal function '_addMasterjeweler' to add this role, called by 'addMasterjeweler'
+    function _addMasterjeweler(address account) internal {
         
     }
 
-    // Define an internal function '_removeRetailer' to remove this role, called by 'removeRetailer'
-    function _removeRetailer(address account) internal {
+    // Define an internal function '_removeMasterjeweler' to remove this role, called by 'removeMasterjeweler'
+    function _removeMasterjeweler(address account) internal {
         
     }
 }

@@ -1,4 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity >0.4.25;
+/**
+
 // Define a contract 'Supplychain'
 contract SupplyChain {
 
@@ -156,19 +158,19 @@ contract SupplyChain {
     }
 
     // Define a modifier that checks if an item.state of a upc is Received
-    modifier sentForSale(uint _upc) {
+    modifier sentForPurchasing(uint _upc) {
 
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Received
-    modifier receivedForSale(uint _upc) {
+    modifier receivedForPurchasing(uint _upc) {
 
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Received
-    modifier forSale(uint _upc) {
+    modifier forPurchasing(uint _upc) {
 
         _;
     }
@@ -393,3 +395,4 @@ contract SupplyChain {
         );
     }
 }
+*/
