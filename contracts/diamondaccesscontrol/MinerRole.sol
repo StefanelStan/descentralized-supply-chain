@@ -13,12 +13,16 @@ contract MinerRole {
 
     // Define a struct 'miners' by inheriting from 'Roles' library, struct Role
     Roles.Role private miners;
-
+    address private owner;
     // In the constructor make the address that deploys this contract the 1st Miner
     constructor() public {
         _addMiner(msg.sender);
+        owner = msg.sender;
     }
-
+    function kill() external {
+        require(msg.sender == owner, "Only the owner can kill this contract");
+        selfdestruct(msg.sender);
+    }
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyMiner() {
         require(isMiner(msg.sender), "Only a miner can add another miner");
