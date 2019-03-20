@@ -1,6 +1,7 @@
-const contractDefinition = artifacts.require('MinerRole');
 const expect = require('chai').expect;
 const truffleAssert = require('truffle-assertions');
+
+const contractDefinition = artifacts.require('MinerRole');
 
 contract('MinerRole', accounts => {
     let contractInstante;

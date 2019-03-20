@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "testrpc": "./node_modules/.bin/testrpc-sc",
-    "coverage": "./node_modules/.bin/solidity-coverage",
+    "truffletest": "truffle.cmd test",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Stefannel",

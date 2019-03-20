@@ -74,5 +74,5 @@ contract('RetailerRole', accounts => {
 });
 
 var expectToRevert = async(promise, errorMessage) => {
-    await truffleAssert.fails(promise, truffleAssert.ErrorType.REVERT, errorMessage);
+    await truffleAssert.reverts(promise, errorMessage);
 }

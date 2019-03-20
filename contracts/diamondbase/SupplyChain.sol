@@ -1,8 +1,9 @@
 pragma solidity >0.4.25;
-/**
-
 // Define a contract 'Supplychain'
-contract SupplyChain {
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+
+contract SupplyChain is Ownable {
 
     // Define 'owner'
     // address owner;
@@ -22,17 +23,25 @@ contract SupplyChain {
   
     // Define enum 'State' with the following values:
     enum State { 
-        Harvested,  // 0
-        Processed,  // 1
-        Packed,     // 2
-        ForSale,    // 3
-        Sold,       // 4
-        Shipped,    // 5
-        Received,   // 6
-        Purchased   // 7
+        Mined,                  // 0
+        ForSale,                // 1
+        Sold,                   // 2
+        Sent,                   // 3
+        Received,               // 4
+        SentToCut,              // 5
+        ReceivedForCutting,     // 6
+        Cut,                    // 7
+        SentFromCutting,        // 8
+        ReceivedFromCutting,    // 9
+        MarkedForPurchasing,    // 10    
+        SentForPurchasing,      // 11
+        ReceivedForPurchasing,  // 12
+        ForPurchasing,          // 13
+        Purchased,              // 14
+        Fetched                 // 15
     }
 
-    State defaultState = State.Harvested;
+    State defaultState = State.Mined;
 
     // Define a struct 'Item' with the following fields:
     struct Item {
@@ -86,7 +95,8 @@ contract SupplyChain {
         _;
         uint _price = items[_upc].productPrice;
         uint amountToReturn = msg.value - _price;
-        items[_upc].consumerID.transfer(amountToReturn);
+        address payable consumerAddress = address(uint160(items[_upc].consumerID));
+        consumerAddress.transfer(amountToReturn);
     }
 
     // Define a modifier that checks the price and refunds the remaining balance
@@ -94,18 +104,19 @@ contract SupplyChain {
         _;
         uint _price = items[_upc].productPrice;
         uint amountToReturn = msg.value - _price;
-        items[_upc].consumerID.transfer(amountToReturn);
+        address payable consumerAddress = address(uint160(items[_upc].consumerID));
+        consumerAddress.transfer(amountToReturn);
     }
 
     // Define a modifier that checks if an item.state of a upc is Harvested
     modifier mined(uint _upc) {
-        require(items[_upc].itemState == State.Harvested);
+        require(items[_upc].itemState == State.Mined);
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Harvested
     modifier forSale(uint _upc) {
-        require(items[_upc].itemState == State.Harvested);
+        require(items[_upc].itemState == State.ForSale);
         _;
     }
 
@@ -190,27 +201,25 @@ contract SupplyChain {
     // and set 'sku' to 1
     // and set 'upc' to 1
     constructor() public payable {
-        owner = msg.sender;
         sku = 1;
         upc = 1;
     }
 
-    // Define a function 'kill' if required
-    function kill() public {
-        if (msg.sender == owner) {
-            selfdestruct(owner);
-        }
+        // Define a function 'kill' if required
+    function kill() external onlyOwner{
+        require(isOwner(), "Only owner can kill this contract");
+        selfdestruct(address(uint160(owner())));
     }
 
     // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
     function mineItem(
         uint _upc, 
         address _originFarmerID, 
-        string _originFarmName, 
-        string _originFarmInformation, 
-        string  _originFarmLatitude, 
-        string  _originFarmLongitude, 
-        string  _productNotes
+        string memory _originFarmName, 
+        string memory _originFarmInformation, 
+        string memory _originFarmLatitude, 
+        string memory _originFarmLongitude, 
+        string memory  _productNotes
     ) 
         public 
     {
@@ -317,7 +326,7 @@ contract SupplyChain {
     function sendItemForPurchasing(uint _upc, address retailer) public {}
     function receiveItemForPurchasing(uint _upc) public {}
     function putUpForPurchasing(uint _upc) public {}
-    function purchaseItem(uint _upc) public {}
+    //function purchaseItem(uint _upc) public {}
     function fetchItem(uint _upc) public {}
   
   
@@ -344,10 +353,10 @@ contract SupplyChain {
             uint    itemUPC,
             address ownerID,
             address originFarmerID,
-            string  originFarmName,
-            string  originFarmInformation,
-            string  originFarmLatitude,
-            string  originFarmLongitude
+            string  memory originFarmName,
+            string  memory originFarmInformation,
+            string  memory originFarmLatitude,
+            string  memory originFarmLongitude
         ) 
     {
     // Assign values to the 8 parameters
@@ -372,7 +381,7 @@ contract SupplyChain {
             uint itemSKU,
             uint itemUPC,
             uint productID,
-            string productNotes,
+            string memory productNotes,
             uint productPrice,
             uint itemState,
             address distributorID,
@@ -395,4 +404,3 @@ contract SupplyChain {
         );
     }
 }
-*/
