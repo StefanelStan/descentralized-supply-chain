@@ -1,4 +1,4 @@
-const contractDefinition = artifacts.require('ManufacturerRole');
+/*const contractDefinition = artifacts.require('ManufacturerRole');
 const expect = require('chai').expect;
 const truffleAssert = require('truffle-assertions');
 
@@ -78,4 +78,4 @@ contract('ManufacturerRole', accounts => {
 
 var expectToRevert = async(promise, errorMessage) => {
     await truffleAssert.fails(promise, truffleAssert.ErrorType.REVERT, errorMessage);
-}
+}*/

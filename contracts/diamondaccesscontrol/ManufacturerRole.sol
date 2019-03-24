@@ -25,7 +25,7 @@ contract ManufacturerRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyManufacturer() {
-        require(isManufacturer(msg.sender), "Only a manufacturer can add another manufacturer");
+        require(isManufacturer(msg.sender), "Only a manufacturer can perform this action");
         _;
     }
 

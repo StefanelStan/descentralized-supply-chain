@@ -25,7 +25,7 @@ contract MinerRole {
     }
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyMiner() {
-        require(isMiner(msg.sender), "Only a miner can add another miner");
+        require(isMiner(msg.sender), "Only a miner can perform this action");
         _;
     }
 
