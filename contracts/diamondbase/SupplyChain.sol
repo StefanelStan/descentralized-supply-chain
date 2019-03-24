@@ -304,11 +304,11 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
         emit Received(_upc);
     }
 
-    function sendItemToCut(uint _upc, address _masterjeweler) public received(_upc) verifyCaller(items[_upc].manufacturer){
-        require(isMasterjeweler(_masterjeweler), "The given address is not a Masterjeweler Role");
+    function sendItemToCut(uint _upc, address masterjeweler) public received(_upc) verifyCaller(items[_upc].manufacturer){
+        require(isMasterjeweler(masterjeweler), "The given address is not a Masterjeweler Role");
         items[_upc].itemState = State.SentToCut;
-        items[_upc].masterjeweler = _masterjeweler;
-        emit SendToCut(_upc);
+        items[_upc].masterjeweler = masterjeweler;
+        emit SentToCut(_upc);
     }
     function receiveItemToCut(uint _upc) public {}
     function cutItem(uint _upc) public {}

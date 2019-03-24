@@ -48,7 +48,7 @@ contract('SupplyChain', accounts => {
     console.log("Retailer: accounts[3] ", accounts[3])
     console.log("Consumer: accounts[4] ", accounts[4])
 
-    
+   /* 
     describe('Test suite: contract ownership, transfer and renounce', () => {
         let currentOwner;
         before(async() => {
@@ -325,7 +325,7 @@ contract('SupplyChain', accounts => {
             expectToRevert(contractInstance.receiveItem(upc, {from: manufacturer}), 'Item state is not Sent');
         });
     });
-
+   */ 
     describe('Test suite: sendItemToCut', () => {
         before(async() => {
             contractInstance = await contractDefinition.new({from:owner});
@@ -341,24 +341,25 @@ contract('SupplyChain', accounts => {
         });
         
         it('should NOT allow to sendItemToCut an inexistent item', async () => {
-            expectToRevert(contractInstance.sendItemToCut(99, {from: manufacturer}), 'Item state is not Received');
+            expectToRevert(contractInstance.sendItemToCut(99, masterjeweler, {from: manufacturer}), 'Item state is not Received');
         });
 
         it('should NOT allow to sendItemToCut an item that is not Received', async () => {
-            expectToRevert(contractInstance.sendItemToCut(upc, {from: manufacturer}), 'Item state is not Received');
+            expectToRevert(contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer}), 'Item state is not Received');
         });
         
         it('should NOT allow unauthorized user to sendItemToCut', async () => {
             await contractInstance.receiveItem(upc, {from: manufacturer});
-            expectToRevert(contractInstance.sendItemToCut(upc, {from: customer}), 'Only the authorized user/address can perform this');
+            expectToRevert(contractInstance.sendItemToCut(upc, masterjeweler, {from: customer}), 'Only the authorized user/address can perform this');
         });
 
         it('should NOT allow to sendItemToCut if the masterjeweler is NOT a masterjeweler role', async () => {
-            //finish this 24/03/2019 23:16
+            expectToRevert(contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer}), 'The given address is not a Masterjeweler Role');
         });
 
         it('should allow manufacturer to receive item, emit event and change state of item', async () => {
-            let tx = await contractInstance.sendItemToCut(upc, {from: manufacturer});
+            //finish this 24/03/2019 23:36 add masterjeweler to MasterjewelerRole by the onwer
+            let tx = await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
             truffleAssert.eventEmitted(tx, 'SentToCut', (ev) => {
                 return expect(Number(ev.upc)).to.equal(upc);
             });
@@ -369,7 +370,7 @@ contract('SupplyChain', accounts => {
         });
 
         it('should not allow the manufacturer to receive the same item twice', async () => {
-            expectToRevert(contractInstance.receiveItem(upc, {from: manufacturer}), 'Item state is not Sent');
+            expectToRevert(contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer}), 'Item state is not Received');
         });
     });
 
