@@ -25,7 +25,7 @@ contract MasterjewelerRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyMasterjeweler() {
-        require(isMasterjeweler(msg.sender), "Only a masterjeweler can add another masterjeweler");
+        require(isMasterjeweler(msg.sender), "Only a masterjeweler can perform this action");
         _;
     } 
 

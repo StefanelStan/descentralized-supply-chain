@@ -25,7 +25,7 @@ contract CustomerRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyCustomer() {
-        require(isCustomer(msg.sender), "Only a customer can add another customer");    
+        require(isCustomer(msg.sender), "Only a customer can perform this action");    
         _;
     } 
 

@@ -20,6 +20,7 @@ contract('SupplyChain', accounts => {
     const itemPrice = web3.utils.toWei("1", "ether");
     const zeroEther = web3.utils.toWei("0", "ether");
     const fiveEther = web3.utils.toWei("5", "ether");
+    const twoEther = web3.utils.toWei("2", "ether");
     const itemState = 0;
     const manufacturer = accounts[2];
     const masterjeweler = accounts[3];
@@ -325,7 +326,7 @@ contract('SupplyChain', accounts => {
             expectToRevert(contractInstance.receiveItem(upc, {from: manufacturer}), 'Item state is not Sent');
         });
     });
-   */ 
+   
     describe('Test suite: sendItemToCut', () => {
         before(async() => {
             contractInstance = await contractDefinition.new({from:owner});
@@ -359,6 +360,7 @@ contract('SupplyChain', accounts => {
 
         it('should allow manufacturer to receive item, emit event and change state of item', async () => {
             //finish this 24/03/2019 23:36 add masterjeweler to MasterjewelerRole by the onwer
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
             let tx = await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
             truffleAssert.eventEmitted(tx, 'SentToCut', (ev) => {
                 return expect(Number(ev.upc)).to.equal(upc);
@@ -366,11 +368,316 @@ contract('SupplyChain', accounts => {
             const resultBufferOne = await contractInstance.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await contractInstance.fetchItemBufferTwo.call(upc)
             assertItemSourceHasProperties(resultBufferOne, upc, upc, manufacturer, owner, minerName, mineInfo, mineLat, mineLong);
-            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 4, manufacturer, zeroAddress, zeroAddress, zeroAddress);
+            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 5, manufacturer, masterjeweler, zeroAddress, zeroAddress);
         });
 
         it('should not allow the manufacturer to receive the same item twice', async () => {
             expectToRevert(contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer}), 'Item state is not Received');
+        });
+    });
+
+    describe('Test suite: receiveItemToCut', () => {
+        before(async() => {
+            contractInstance = await contractDefinition.new({from:owner});
+            await contractInstance.mineItem(upc, minerName, mineInfo, mineLat, mineLong, productNotes, {from: owner});
+            await contractInstance.sellItem(upc, itemPrice, {from: owner});
+            await contractInstance.addManufacturer(manufacturer, {from: owner});
+            await contractInstance.buyItem(upc, {from: manufacturer, value: itemPrice});
+            await contractInstance.sendItem(upc, {from: owner});
+            await contractInstance.receiveItem(upc, {from: manufacturer});
+        });
+
+        after(async() => {
+            await contractInstance.kill({from:owner});
+        });
+        
+        it('should NOT allow to receiveItemToCut an inexistent item', async () => {
+            expectToRevert(contractInstance.receiveItemToCut(99, {from: masterjeweler}), 'Item state is not SentToCut');
+        });
+
+        it('should NOT allow to receiveItemToCut an item that is not SentToCut', async () => {
+            expectToRevert(contractInstance.receiveItemToCut(upc, {from: manufacturer}), 'Item state is not SentToCut');
+        });
+        
+        it('should NOT allow to receiveItemToCut if the masterjeweler is NOT a masterjeweler role', async () => {
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer})
+            await contractInstance.renounceMasterjeweler({from: masterjeweler});
+            expectToRevert(contractInstance.receiveItemToCut(upc, {from: masterjeweler}), 'Only a masterjeweler can perform this action');
+        });
+
+        it('should NOT allow unauthorized user to receiveItemToCut', async () => {
+            expectToRevert(contractInstance.receiveItemToCut(upc, {from: customer}), 'Only the authorized user/address can perform this');
+        });
+
+        it('should allow masterjeweler to receive item, emit event and change state of item', async () => {
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            let tx = await contractInstance.receiveItemToCut(upc, {from: masterjeweler});
+            truffleAssert.eventEmitted(tx, 'ReceivedForCutting', (ev) => {
+                return expect(Number(ev.upc)).to.equal(upc);
+            });
+            const resultBufferOne = await contractInstance.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await contractInstance.fetchItemBufferTwo.call(upc)
+            assertItemSourceHasProperties(resultBufferOne, upc, upc, manufacturer, owner, minerName, mineInfo, mineLat, mineLong);
+            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 6, manufacturer, masterjeweler, zeroAddress, zeroAddress);
+        });
+
+        it('should NOT allow the masterjeweler to receiveItemToCut the same item twice', async () => {
+            expectToRevert(contractInstance.receiveItemToCut(upc, {from: masterjeweler}), 'Item state is not SentToCut');
+        });
+    });
+
+    describe('Test suite: cutItem', () => {
+        before(async() => {
+            contractInstance = await contractDefinition.new({from:owner});
+            await contractInstance.mineItem(upc, minerName, mineInfo, mineLat, mineLong, productNotes, {from: owner});
+            await contractInstance.sellItem(upc, itemPrice, {from: owner});
+            await contractInstance.addManufacturer(manufacturer, {from: owner});
+            await contractInstance.buyItem(upc, {from: manufacturer, value: itemPrice});
+            await contractInstance.sendItem(upc, {from: owner});
+            await contractInstance.receiveItem(upc, {from: manufacturer});
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
+            
+        });
+
+        after(async() => {
+            await contractInstance.kill({from:owner});
+        });
+        
+        it('should NOT allow to cutItem an inexistent item', async () => {
+            expectToRevert(contractInstance.cutItem(99, {from: masterjeweler}), 'Item state is not ReceivedForCutting');
+        });
+
+        it('should NOT allow to cutItem an item that is not ReceivedForCutting', async () => {
+            expectToRevert(contractInstance.cutItem(upc, {from: masterjeweler}), 'Item state is not ReceivedForCutting');
+        });
+        
+        it('should NOT allow to cutItem if the masterjeweler is NOT a masterjeweler role', async () => {
+            await contractInstance.receiveItemToCut(upc, {from: masterjeweler});
+            await contractInstance.renounceMasterjeweler({from: masterjeweler});
+            expectToRevert(contractInstance.cutItem(upc, {from: masterjeweler}), 'Only a masterjeweler can perform this action');
+        });
+
+        it('should NOT allow unauthorized user to cutItem', async () => {
+            expectToRevert(contractInstance.cutItem(upc, {from: customer}), 'Only the authorized user/address can perform this');
+        });
+
+        it('should allow masterjeweler to cutItem item, emit event and change state of item', async () => {
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            let tx = await contractInstance.cutItem(upc, {from: masterjeweler});
+            truffleAssert.eventEmitted(tx, 'Cut', (ev) => {
+                return expect(Number(ev.upc)).to.equal(upc);
+            });
+            const resultBufferOne = await contractInstance.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await contractInstance.fetchItemBufferTwo.call(upc)
+            assertItemSourceHasProperties(resultBufferOne, upc, upc, manufacturer, owner, minerName, mineInfo, mineLat, mineLong);
+            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 7, manufacturer, masterjeweler, zeroAddress, zeroAddress);
+        });
+
+        it('should NOT allow the masterjeweler to cutItem the same item twice', async () => {
+            expectToRevert(contractInstance.cutItem(upc, {from: masterjeweler}), 'Item state is not ReceivedForCutting');
+        });
+    });
+*/
+
+    describe('Test suite: returnCutItem', () => {
+        before(async() => {
+            contractInstance = await contractDefinition.new({from:owner});
+            await contractInstance.mineItem(upc, minerName, mineInfo, mineLat, mineLong, productNotes, {from: owner});
+            await contractInstance.sellItem(upc, itemPrice, {from: owner});
+            await contractInstance.addManufacturer(manufacturer, {from: owner});
+            await contractInstance.buyItem(upc, {from: manufacturer, value: itemPrice});
+            await contractInstance.sendItem(upc, {from: owner});
+            await contractInstance.receiveItem(upc, {from: manufacturer});
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
+            await contractInstance.receiveItemToCut(upc, {from: masterjeweler});
+        });
+
+        after(async() => {
+            await contractInstance.kill({from:owner});
+        });
+        
+        it('should NOT allow to returnCutItem an inexistent item', async () => {
+            expectToRevert(contractInstance.returnCutItem(99, {from: masterjeweler}), 'Item state is not Cut');
+        });
+
+        it('should NOT allow to returnCutItem an item that is not Cut', async () => {
+            expectToRevert(contractInstance.returnCutItem(upc, {from: masterjeweler}), 'Item state is not Cut');
+        });
+        
+        it('should NOT allow unauthorized user to sendItemToCut', async () => {
+            await contractInstance.cutItem(upc, {from: masterjeweler});
+            expectToRevert(contractInstance.returnCutItem(upc, {from: customer}), 'Only the authorized user/address can perform this');
+        });
+
+        it('should allow masterjeweler to returnCutItem, emit event and change state of item', async () => {
+            let tx = await contractInstance.returnCutItem(upc, {from: masterjeweler});
+            truffleAssert.eventEmitted(tx, 'SentFromCutting', (ev) => {
+                return expect(Number(ev.upc)).to.equal(upc);
+            });
+            const resultBufferOne = await contractInstance.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await contractInstance.fetchItemBufferTwo.call(upc)
+            assertItemSourceHasProperties(resultBufferOne, upc, upc, manufacturer, owner, minerName, mineInfo, mineLat, mineLong);
+            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 8, manufacturer, masterjeweler, zeroAddress, zeroAddress);
+        });
+
+        it('should not allow the manufacturer to receive the same item twice', async () => {
+            expectToRevert(contractInstance.returnCutItem(upc, {from: masterjeweler}), 'Item state is not Cut');
+        });
+    });
+   
+
+   describe('Test suite: receiveCutItem', () => {
+        before(async() => {
+            contractInstance = await contractDefinition.new({from:owner});
+            await contractInstance.mineItem(upc, minerName, mineInfo, mineLat, mineLong, productNotes, {from: owner});
+            await contractInstance.sellItem(upc, itemPrice, {from: owner});
+            await contractInstance.addManufacturer(manufacturer, {from: owner});
+            await contractInstance.buyItem(upc, {from: manufacturer, value: itemPrice});
+            await contractInstance.sendItem(upc, {from: owner});
+            await contractInstance.receiveItem(upc, {from: manufacturer});
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
+            await contractInstance.receiveItemToCut(upc, {from: masterjeweler});
+            await contractInstance.cutItem(upc, {from: masterjeweler});
+        });
+
+        after(async() => {
+            await contractInstance.kill({from:owner});
+        });
+        
+        it('should NOT allow to receiveCutItem an inexistent item', async () => {
+            expectToRevert(contractInstance.receiveCutItem(99, {from: masterjeweler}), 'Item state is not SentFromCutting');
+        });
+
+        it('should NOT allow to receiveCutItem an item that is not SentFromCutting', async () => {
+            expectToRevert(contractInstance.receiveCutItem(upc, {from: masterjeweler}), 'Item state is not SentFromCutting');
+        });
+        
+        it('should NOT allow unauthorized user to receiveCutItem', async () => {
+            await contractInstance.returnCutItem(upc, {from: masterjeweler});
+            expectToRevert(contractInstance.receiveCutItem(upc, {from: customer}), 'Only the authorized user/address can perform this');
+        });
+
+        it('should allow masterjeweler to receiveCutItem, emit event and change state of item', async () => {
+            let tx = await contractInstance.receiveCutItem(upc, {from: manufacturer});
+            truffleAssert.eventEmitted(tx, 'ReceivedFromCutting', (ev) => {
+                return expect(Number(ev.upc)).to.equal(upc);
+            });
+            const resultBufferOne = await contractInstance.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await contractInstance.fetchItemBufferTwo.call(upc)
+            assertItemSourceHasProperties(resultBufferOne, upc, upc, manufacturer, owner, minerName, mineInfo, mineLat, mineLong);
+            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 9, manufacturer, masterjeweler, zeroAddress, zeroAddress);
+        });
+
+        it('should not allow the manufacturer to receiveCutItem the same item twice', async () => {
+            expectToRevert(contractInstance.receiveCutItem(upc, {from: manufacturer}), 'Item state is not SentFromCutting');
+        });
+    });
+    
+    describe('Test suite: markForPurchasing', () => {
+        before(async() => {
+            contractInstance = await contractDefinition.new({from:owner});
+            await contractInstance.mineItem(upc, minerName, mineInfo, mineLat, mineLong, productNotes, {from: owner});
+            await contractInstance.sellItem(upc, itemPrice, {from: owner});
+            await contractInstance.addManufacturer(manufacturer, {from: owner});
+            await contractInstance.buyItem(upc, {from: manufacturer, value: itemPrice});
+            await contractInstance.sendItem(upc, {from: owner});
+            await contractInstance.receiveItem(upc, {from: manufacturer});
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
+            await contractInstance.receiveItemToCut(upc, {from: masterjeweler});
+            await contractInstance.cutItem(upc, {from: masterjeweler});
+            await contractInstance.returnCutItem(upc, {from: masterjeweler});
+        });
+
+        after(async() => {
+            await contractInstance.kill({from:owner});
+        });
+        
+        it('should NOT allow to markForPurchasing an inexistent item', async () => {
+            expectToRevert(contractInstance.markForPurchasing(99, twoEther, {from: manufacturer}), 'Item state is not ReceivedFromCutting');
+        });
+
+        it('should NOT allow to markForPurchasing an item that is not ReceivedFromCutting', async () => {
+            expectToRevert(contractInstance.markForPurchasing(upc, twoEther, {from: manufacturer}), 'Item state is not ReceivedFromCutting');
+        });
+        
+        it('should NOT allow unauthorized user to markForPurchasing', async () => {
+            await contractInstance.receiveCutItem(upc, {from: manufacturer});
+            expectToRevert(contractInstance.markForPurchasing(upc, twoEther, {from: customer}), 'Only the authorized user/address can perform this');
+        });
+
+        it('should allow manufacturer to markForPurchasing, emit event and change state of item', async () => {
+            let tx = await contractInstance.markForPurchasing(upc, twoEther, {from: manufacturer});
+            truffleAssert.eventEmitted(tx, 'MarkedForPurchasing', (ev) => {
+                return expect(Number(ev.upc)).to.equal(upc);
+            });
+            const resultBufferOne = await contractInstance.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await contractInstance.fetchItemBufferTwo.call(upc)
+            assertItemSourceHasProperties(resultBufferOne, upc, upc, manufacturer, owner, minerName, mineInfo, mineLat, mineLong);
+            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, twoEther, 10, manufacturer, masterjeweler, zeroAddress, zeroAddress);
+        });
+
+        it('should not allow the manufacturer to markForPurchasing the same item twice', async () => {
+            expectToRevert(contractInstance.markForPurchasing(upc, twoEther, {from: manufacturer}), 'Item state is not ReceivedFromCutting');
+        });
+    });
+
+    describe('Test suite: sendItemForPurchasing', () => {
+        before(async() => {
+            contractInstance = await contractDefinition.new({from:owner});
+            await contractInstance.mineItem(upc, minerName, mineInfo, mineLat, mineLong, productNotes, {from: owner});
+            await contractInstance.sellItem(upc, itemPrice, {from: owner});
+            await contractInstance.addManufacturer(manufacturer, {from: owner});
+            await contractInstance.buyItem(upc, {from: manufacturer, value: itemPrice});
+            await contractInstance.sendItem(upc, {from: owner});
+            await contractInstance.receiveItem(upc, {from: manufacturer});
+            await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
+            await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
+            await contractInstance.receiveItemToCut(upc, {from: masterjeweler});
+            await contractInstance.cutItem(upc, {from: masterjeweler});
+            await contractInstance.returnCutItem(upc, {from: masterjeweler});
+            await contractInstance.receiveCutItem(upc, {from: manufacturer});
+        });
+
+        after(async() => {
+            await contractInstance.kill({from:owner});
+        });
+        
+        it('should NOT allow to sendItemForPurchasing an inexistent item', async () => {
+            expectToRevert(contractInstance.sendItemForPurchasing(99, retailer, {from: manufacturer}), 'Item state is not MarkedForPurchasing');
+        });
+
+        it('should NOT allow to sendItemForPurchasing an item that is not MarkedForPurchasing', async () => {
+            expectToRevert(contractInstance.sendItemForPurchasing(upc, retailer, {from: manufacturer}), 'Item state is not MarkedForPurchasing');
+        });
+        
+        it('should NOT allow unauthorized user to sendItemForPurchasing', async () => {
+            await contractInstance.markForPurchasing(upc, twoEther, {from: manufacturer});
+            expectToRevert(contractInstance.sendItemForPurchasing(upc, retailer, {from: customer}), 'Only the authorized user/address can perform this');
+        });
+
+        it('should NOT allow to sendItemForPurchasing if the retailer is NOT a retailer role', async () => {
+            expectToRevert(contractInstance.sendItemForPurchasing(upc, retailer, {from: manufacturer}), 'The given address is not a Retailer Role');
+        });
+
+        it('should allow manufacturer to receive item, emit event and change state of item', async () => {
+            await contractInstance.addRetailer(retailer, {from: owner});
+            let tx = await contractInstance.sendItemForPurchasing(upc, retailer, {from: manufacturer});
+            truffleAssert.eventEmitted(tx, 'SentForPurchasing', (ev) => {
+                return expect(Number(ev.upc)).to.equal(upc);
+            });
+            const resultBufferOne = await contractInstance.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await contractInstance.fetchItemBufferTwo.call(upc)
+            assertItemSourceHasProperties(resultBufferOne, upc, upc, manufacturer, owner, minerName, mineInfo, mineLat, mineLong);
+            assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, twoEther, 11, manufacturer, masterjeweler, retailer, zeroAddress);
+        });
+
+        it('should not allow the manufacturer to receive the same item twice', async () => {
+            expectToRevert(contractInstance.sendItemForPurchasing(upc, retailer, {from: manufacturer}), 'Item state is not MarkedForPurchasing');
         });
     });
 
@@ -611,7 +918,7 @@ const assertItemHasProperties = (resultBufferTwo, sku, upc, productId, notes, it
     expect(Number(resultBufferTwo[2])).to.equal(productId);
     expect(resultBufferTwo[3]).to.equal(notes);
     expect(Number(resultBufferTwo[4])).to.equal(Number(itemPrice));
-    expect(Number(resultBufferTwo[5])).to.equal(productPrice);
+    expect(Number(resultBufferTwo[5])).to.equal(Number(productPrice));
     expect(Number(resultBufferTwo[6])).to.equal(state);
     expect(resultBufferTwo[7]).to.equal(manufacturer);
     expect(resultBufferTwo[8]).to.equal(masterjeweler);

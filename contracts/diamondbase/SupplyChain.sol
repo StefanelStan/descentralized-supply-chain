@@ -110,7 +110,8 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
     // Define a modifier that checks if an item.state of a upc is Mined
     modifier mined(uint _upc) {
         //State.mined == 0 so for any inexistent item, its state will be zero. Need stronger verification eg: has an owner
-        require(items[_upc].itemState == State.Mined && items[_upc].owner != address(0), "Item state is not Mined");
+        require(items[_upc].itemState == State.Mined && items[_upc].owner != address(0), 
+                "Item state is not Mined");
         _;
     }
 
@@ -170,7 +171,8 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
 
     // Define a modifier that checks if an item.state of a upc is MarkedForPurchasing
     modifier markedForPurchasing(uint _upc) {
-        require(items[_upc].itemState == State.MarkedForPurchasing, "Item state is not MarkedForPurchasing");
+        require(items[_upc].itemState == State.MarkedForPurchasing, 
+                "Item state is not MarkedForPurchasing");
         _;
     }
 
@@ -182,7 +184,8 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
 
     // Define a modifier that checks if an item.state of a upc is ReceivedForPurchasing
     modifier receivedForPurchasing(uint _upc) {
-        require(items[_upc].itemState == State.ReceivedForPurchasing, "Item state is not ReceivedForPurchasing");
+        require(items[_upc].itemState == State.ReceivedForPurchasing, 
+                "Item state is not ReceivedForPurchasing");
         _;
     }
 
@@ -260,20 +263,6 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
         emit ForSale(_upc);
     }
 
-  // // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
-  // function packItem(uint _upc) public 
-  // // Call modifier to check if upc has passed previous supply chain stage
-  
-  // // Call modifier to verify caller of this function
-  
-  // {
-  //   // Update the appropriate fields
-    
-  //   // Emit the appropriate event
-    
-  // }
-
-
     // Define a function 'buyItem' that allows the disributor to mark an item 'Sold'
     function buyItem(uint _upc) 
         public 
@@ -297,31 +286,79 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
         emit Sent(_upc);
     }
 
-    // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
-    // Use the above modifiers to check if the item is shipped
     function receiveItem(uint _upc) public sent(_upc) verifyCaller(items[_upc].manufacturer) {
         items[_upc].itemState = State.Received;
         emit Received(_upc);
     }
 
-    function sendItemToCut(uint _upc, address masterjeweler) public received(_upc) verifyCaller(items[_upc].manufacturer){
+    function sendItemToCut(uint _upc, address masterjeweler) 
+        public 
+        received(_upc) 
+        verifyCaller(items[_upc].manufacturer)
+    {
         require(isMasterjeweler(masterjeweler), "The given address is not a Masterjeweler Role");
         items[_upc].itemState = State.SentToCut;
         items[_upc].masterjeweler = masterjeweler;
         emit SentToCut(_upc);
     }
-    function receiveItemToCut(uint _upc) public {}
-    function cutItem(uint _upc) public {}
-    function returnCutItem(uint _upc) public {}
-    function receiveCutItem(uint _upc) public {}
-    function markForPurchasing(uint _upc, uint price) public {}
-    function sendItemForPurchasing(uint _upc, address retailer) public {}
+
+    function receiveItemToCut(uint _upc) 
+        public 
+        sentToCut(_upc) 
+        verifyCaller(items[_upc].masterjeweler) 
+        onlyMasterjeweler 
+    {
+        items[_upc].itemState = State.ReceivedForCutting;
+        emit ReceivedForCutting(_upc);
+    }
+
+    function cutItem(uint _upc) 
+        public
+        receivedForCutting(_upc)
+        verifyCaller(items[_upc].masterjeweler)
+        onlyMasterjeweler
+    {
+        items[_upc].itemState = State.Cut;
+        emit Cut(_upc);
+    }
+
+    function returnCutItem(uint _upc) public cut(_upc) verifyCaller(items[_upc].masterjeweler) {
+        items[_upc].itemState = State.SentFromCutting;
+        emit SentFromCutting(_upc);
+    }
+
+    function receiveCutItem(uint _upc) 
+        public 
+        sentFromCutting(_upc)
+        verifyCaller(items[_upc].manufacturer)
+    {
+        items[_upc].itemState = State.ReceivedFromCutting;
+        emit ReceivedFromCutting(_upc);
+    }
+
+    function markForPurchasing(uint _upc, uint _price) 
+        public
+        receivedFromCutting(_upc)
+        verifyCaller(items[_upc].manufacturer)
+    {
+        items[_upc].itemState = State.MarkedForPurchasing;
+        items[_upc].productPrice = _price;
+        emit MarkedForPurchasing(_upc);
+    }
+
+    function sendItemForPurchasing(uint _upc, address retailer) 
+        public
+        markedForPurchasing(_upc)
+        verifyCaller(items[_upc].manufacturer)
+    {
+        require(isRetailer(retailer), "The given address is not a Retailer Role");
+        items[_upc].itemState = State.SentForPurchasing;
+        items[_upc].retailer = retailer;
+        emit SentForPurchasing(_upc);
+    }
+
     function receiveItemForPurchasing(uint _upc) public {}
     function putUpForPurchasing(uint _upc) public {}
-    //function purchaseItem(uint _upc) public {}
-    function fetchItem(uint _upc) public {}
-  
-  
 
     // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
     // Use the above modifiers to check if the item is received
@@ -335,6 +372,7 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
         // Emit the appropriate event
     
     }
+    function fetchItem(uint _upc) public {}
 
     // Define a function 'fetchItemBufferOne' that fetches the data
     function fetchItemBufferOne(uint _upc) 
@@ -353,14 +391,16 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
     {
     // Assign values to the 8 parameters
         Item memory item = items[_upc];
-        sku = item.sku;
-        upc = item.upc;
-        owner = item.owner;
-        miner = item.miner;
-        minerName = item.minerName;
-        mineInformation = item.mineInformation;
-        mineLatitude = item.mineLatitude;
-        mineLongitude = item.mineLongitude;
+        return (
+            item.sku,
+            item.upc,
+            item.owner,
+            item.miner,
+            item.minerName,
+            item.mineInformation,
+            item.mineLatitude,
+            item.mineLongitude
+        );
     }
 
     // Define a function 'fetchItemBufferTwo' that fetches the data
