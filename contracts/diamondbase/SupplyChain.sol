@@ -357,23 +357,51 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
         emit SentForPurchasing(_upc);
     }
 
-    function receiveItemForPurchasing(uint _upc) public {}
-    function putUpForPurchasing(uint _upc) public {}
+    function receiveItemForPurchasing(uint _upc) 
+        public 
+        sentForPurchasing(_upc) 
+        verifyCaller(items[_upc].retailer)
+    {
+        items[_upc].itemState = State.ReceivedForPurchasing;
+        emit ReceivedForPurchasing(_upc);
+    }
+
+    function putUpForPurchasing(uint _upc) 
+        public
+        receivedForPurchasing(_upc)
+        verifyCaller(items[_upc].retailer)
+        onlyRetailer
+    {
+        items[_upc].itemState = State.ForPurchasing;
+        emit ForPurchasing(_upc);
+    }
 
     // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
     // Use the above modifiers to check if the item is received
-    function purchaseItem(uint _upc) public 
-        // Call modifier to check if upc has passed previous supply chain stage
-        
-        // Access Control List enforced by calling Smart Contract / DApp
+    function purchaseItem(uint _upc)//
+        public 
+        payable 
+        forPurchasing(_upc) 
+        paidEnough(items[_upc].productPrice) 
+        onlyCustomer 
+        checkValueForPurchasing(_upc)
     {
-        // Update the appropriate fields - ownerID, consumerID, itemState
-        
-        // Emit the appropriate event
-    
+        Item storage item = items[_upc];
+        address(uint160(item.retailer)).transfer(item.productPrice);
+        item.owner = msg.sender;
+        item.customer = msg.sender;
+        item.itemState = State.Purchased;
+        emit Purchased(_upc);
     }
-    function fetchItem(uint _upc) public {}
+    
+    function fetchItem(uint _upc) public purchased(_upc) verifyCaller(items[_upc].customer)
+    {
+        items[_upc].itemState = State.Fetched;
+        emit Fetched(_upc);
+    }
 
+    //Define function to upload() and modify() picture 26/03/2019 @ 21:46
+    
     // Define a function 'fetchItemBufferOne' that fetches the data
     function fetchItemBufferOne(uint _upc) 
         public 
