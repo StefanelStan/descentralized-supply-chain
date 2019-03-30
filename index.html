@@ -27,10 +27,10 @@
             <input type="number" id="upc" name="upc" value="0"><br>
             Current Owner ID
             <br>
-            <input type="text" id="ownerID" name="ownerID" value="0x000000000000000000000000000" size="50"><br>
+            <input type="text" id="ownerID" name="ownerID" value="0x000000000000000000000000000" size="50" disabled="true"><br>
             <div class="button-div">
-                <button class="btn-fetchOne" id="button" type="button" data-id="9">Fetch Data 1</button>
-                <button class="btn-fetchTwo" id="button" type="button" data-id="10">Fetch Data 2</button>
+                <button class="btn-fetchOne" type="button" data-id="17">Fetch Data 1</button>
+                <button class="btn-fetchTwo" type="button" data-id="18">Fetch Data 2</button>
             </div>
         </div>
         <div class="form-break"></div>
@@ -53,38 +53,52 @@
             <br>
             <input type="text" id="mineLongitude" name="mineLongitude" value="144.341490"><br>
             <br>
-            <button class="btn-harvest" id="button" type="button" data-id="1">Mine</button>
-            <button class="btn-process" id="button" type="button" data-id="2">Process</button>
-            <button class="btn-pack" id="button" type="button" data-id="3">Pack</button>
-            <button class="btn-forsale" id="button" type="button" data-id="4">ForSale</button>
+            Item Notes
+            <br>
+            <input type="text" id="itemNotes" name="itemNotes" value="Shiniest Diamond" size="60"><br>
+            <button class="btn-mine" type="button" data-id="1">1.Mine</button>
+            <button class="btn-sell" type="button" data-id="2">2.Sell</button>
+            <button class="btn-buy" type="button" data-id="3">3.Buy</button>
+            <button class="btn-send"  type="button" data-id="4">4.Send</button>
+            <button class="btn-receive" type="button" data-id="5">5.Receive</button>
+            <button class="btn-sendToCut" type="button" data-id="6">6.SendToCut</button>
+            <button class="btn-receiveToCut" type="button" data-id="7">7.ReceiveToCut</button>
+            <button class="btn-cut" type="button" data-id="8">8.Cut</button>
+            <button class="btn-returnCut" type="button" data-id="9">9.ReturnCutItem</button>
+            <button class="btn-receiveCut" type="button" data-id="10">10.ReceiveCutItem</button>
         </div>
         <div class="form-break"></div>
         <h2>Product Details</h2>
         <div class="form-group">
-            Product Notes
-            <br>
-            <input type="text" id="itemNotes" name="itemNotes" value="Best beans for Espresso" size="60"><br>
-            Product Price
+            Item Price
             <br>
             <input type="number" id="itemPrice" name="itemPrice" value="1">ETH<br>
-            Distributor ID
+            Manufacturer ID
             <br>
-            <input type="text" id="distributorID" name="distributorID" value="0xf1b1bcd24dad92303dd9fe78be639f7bcf9c238d"
-                size="50">
+            <input type="text" id="manufacturer" name="manufacturer" value="0x0000000000000000000000000000000000000000"
+                size="50"><br>
+            Masterjeweler ID
             <br>
+            <input type="text" id="masterjeweler" name="masterjeweler" value="0x0000000000000000000000000000000000000000"
+                size="50"><br>
+            Product Price
+            <br>
+            <input type="number" id="productPrice" name="productPrice" value="2">ETH<br>     
             Retailer ID
             <br>
-            <input type="text" id="retailerID" name="retailerID" value="0x0fb2bfefd526966c87efa19f6693d50971763fc2"
+            <input type="text" id="retailer" name="retailer" value="0x0000000000000000000000000000000000000000"
                 size="50"><br>
-            Distributor ID
+            Customer ID
             <br>
-            <input type="text" id="consumerID" name="consumerID" value="0x5d777e9127b28fb119e81a6304278a0a21bef1c4"
+            <input type="text" id="customer" name="customer" value="0x0000000000000000000000000000000000000000"
                 size="50"><br>
             <br>
-            <button class="btn-buy" id="button" type="button" data-id="5">Buy</button>
-            <button class="btn-ship" id="button" type="button" data-id="6">Ship</button>
-            <button class="btn-receive" id="button" type="button" data-id="7">Receive</button>
-            <button class="btn-purchase" id="button" type="button" data-id="8">Purchase</button>
+            <button class="btn-markForPurchase" type="button" data-id="11">11.MarkForPurchasing</button>
+            <button class="btn-sendForPurchase" type="button" data-id="12">12.SendForPurchasing</button>
+            <button class="btn-receiveForPurchase" type="button" data-id="13">13.ReceiveForPurchasing</button>
+            <button class="btn-PutUpForPurchase" type="button" data-id="14">14.PutUpForPurchasing</button>
+            <button class="btn-purchase" type="button" data-id="15">15.Purchase</button>
+            <button class="btn-fetch" type="button" data-id="16">16.Fetch</button>
         </div>
         <div class="form-break"></div>
         <hr>
