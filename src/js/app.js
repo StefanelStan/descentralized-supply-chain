@@ -134,14 +134,14 @@ App = {
                 return await App.mineItem(event);
                 break;
             case 2:
-                return await App.processItem(event);
+                return await App.sellItem(event);
                 break;
             case 3:
                 return await App.packItem(event);
                 break;
-            case 4:
-                return await App.sellItem(event);
-                break;
+            // case 4:
+            //     return await App.sellItem(event);
+            //     break;
             case 5:
                 return await App.buyItem(event);
                 break;
@@ -186,18 +186,19 @@ App = {
         });
     },
 
-    processItem: function (event) {
+    sellItem: async (event) => {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
-
-        App.contracts.SupplyChain.deployed().then(function(instance) {
-            return instance.processItem(App.upc, {from: App.metamaskAccountID});
-        }).then(function(result) {
+        App.readForm();
+        try {
+            let instance = await App.contracts.SupplyChain.deployed();
+            let itemPrice = web3.toWei(App.itemPrice, "ether");
+            let result = await instance.sellItem(App.upc, itemPrice, {from: App.miner});
             $("#ftc-item").text(result);
-            console.log('processItem',result);
-        }).catch(function(err) {
+            console.log('sellItem',result);
+        } catch(err) {
             console.log(err.message);
-        });
+        };
     },
     
     packItem: function (event) {
@@ -214,21 +215,21 @@ App = {
         });
     },
 
-    sellItem: function (event) {
-        event.preventDefault();
-        var processId = parseInt($(event.target).data('id'));
+    // sellItem: function (event) {
+    //     event.preventDefault();
+    //     var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.deployed().then(function(instance) {
-            const itemPrice = web3.toWei(1, "ether");
-            console.log('itemPrice', itemPrice);
-            return instance.sellItem(App.upc, App.itemPrice, {from: App.metamaskAccountID});
-        }).then(function(result) {
-            $("#ftc-item").text(result);
-            console.log('sellItem', result);
-        }).catch(function(err) {
-            console.log(err.message);
-        });
-    },
+    //     App.contracts.SupplyChain.deployed().then(function(instance) {
+    //         const itemPrice = web3.toWei(1, "ether");
+    //         console.log('itemPrice', itemPrice);
+    //         return instance.sellItem(App.upc, App.itemPrice, {from: App.metamaskAccountID});
+    //     }).then(function(result) {
+    //         $("#ftc-item").text(result);
+    //         console.log('sellItem', result);
+    //     }).catch(function(err) {
+    //         console.log(err.message);
+    //     });
+    // },
 
     buyItem: function (event) {
         event.preventDefault();
@@ -312,6 +313,7 @@ App = {
         }).then(function(result) {
           $("#ftc-item").text(result);
           console.log('fetchItemBufferTwo', result);
+          console.log(result[4].toString());
         }).catch(function(err) {
           console.log(err.message);
         });
