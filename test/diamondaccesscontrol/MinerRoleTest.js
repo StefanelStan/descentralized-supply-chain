@@ -1,4 +1,4 @@
-/*const expect = require('chai').expect;
+const expect = require('chai').expect;
 const truffleAssert = require('truffle-assertions');
 
 const contractDefinition = artifacts.require('MinerRole');
@@ -23,7 +23,7 @@ contract('MinerRole', accounts => {
         });
 
         it('should not allow unauthorized users to add miners', async() => {
-            expectToRevert(contractInstante.addMiner(accounts[7], {from: user2}), 'Only a miner can add another miner');
+            expectToRevert(contractInstante.addMiner(accounts[7], {from: user2}), 'Only a miner can perform this action');
             expect(await contractInstante.isMiner(accounts[7])).to.be.false;
         });
         
@@ -67,7 +67,7 @@ contract('MinerRole', accounts => {
             expect(await contractInstante.isMiner(owner)).to.be.true;
             await contractInstante.renounceMiner({from: owner});
             expect(await contractInstante.isMiner(owner)).to.be.false;
-            expectToRevert(contractInstante.addMiner(user2, {from: owner}), 'Only a miner can add another miner');                
+            expectToRevert(contractInstante.addMiner(user2, {from: owner}), 'Only a miner can perform this action');                
         });
     });
 
@@ -75,4 +75,4 @@ contract('MinerRole', accounts => {
 
 var expectToRevert = async(promise, errorMessage) => {
     await truffleAssert.fails(promise, truffleAssert.ErrorType.REVERT, errorMessage);
-}*/
+}

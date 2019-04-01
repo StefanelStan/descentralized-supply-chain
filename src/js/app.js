@@ -123,79 +123,86 @@ App = {
 
     bindEvents: function() {
         $(document).on('click', App.handleButtonClick);
+        $(document).on('change', App.handleChange);
+    },
+
+    handleChange: async (event) => {
+        var processId = parseInt($(event.target).data('id'));
+        if (processId == 24) {
+            const file = event.target.files[0];
+            $('#selectedIpfsFile').val(file.name);
+            console.log(file);
+        }
     },
 
     handleButtonClick: async (event) => {
-        event.preventDefault();
-
         App.getMetaskAccountID();
         
         App.readForm();
         var processId = parseInt($(event.target).data('id'));
         console.log('processId',processId);
 
-        switch(processId) {
+        switch (processId) {
+            case 0:
+                return await App.giveMeAllRoles(event);
             case 1:
                 return await App.mineItem(event);
-                break;
             case 2:
                 return await App.sellItem(event);
-                break;
             case 3:
                 return await App.buyItem(event)
-                break;
             case 4:
                 return await App.sendItem(event);
-                break;
             case 5:
                 return await App.receiveItem(event);
-                break;
             case 6:
                 return await App.sendItemToCut(event);
-                break;
             case 7:
                 return await App.receiveItemToCut(event);
-                break;
             case 8:
                 return await App.cutItem(event);
-                break;
             case 9:
                 return await App.returnCutItem(event);
-                break;
             case 10:
                 return await App.receiveCutItem(event);
-                break;
             case 11:
                 return await App.markForPurchasing(event);
-                break;
             case 12:
                 return await App.sendItemForPurchasing(event);
-                break;
             case 13:
                 return await App.receiveItemForPurchasing(event);
-                break;
             case 14:
                 return await App.putUpForPurchasing(event);
-                break;
             case 15:
                 return await App.purchaseItem(event);
-                break;
             case 16:
                 return await App.fetchItem(event);
-                break;  
             case 17:
                 return await App.fetchItemBufferOne(event);
-                break;
             case 18:
                 return await App.fetchItemBufferTwo(event);
+            case 19:
+                $('#file-input').click();
                 break;
-            }
+            case 20:
+                return await App.readHash(event);
+        }
     },
-    
+    giveMeAllRoles: async(event) => {
+        try {
+            event.preventDefault();
+            const instance = await App.contracts.SupplyChain.deployed(); 
+            const result = await instance.giveMeAllRoles();
+            console.log('giveMeAllRoles', result);
+        } catch(err) {
+            console.log(err.message);
+        };
+    },
+
     mineItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed(); 
-            alert(`hi! ${App.upc}/${App.minerName}/${App.mineInformation}/${App.mineLatitude}/${App.mineLongitude}/${App.itemNotes}`);
             const result = await instance.mineItem(
                 App.upc, 
                 App.minerName, 
@@ -204,7 +211,6 @@ App = {
                 App.mineLongitude, 
                 App.itemNotes  
             );
-            $("#ftc-item").text(result);
             console.log('mineItem', result);
         } catch(err) {
             console.log(err.message);
@@ -213,10 +219,10 @@ App = {
 
     sellItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             let itemPrice = web3.toWei(App.itemPrice, "ether");
             let result = await instance.sellItem(App.upc, itemPrice);
-            $("#ftc-item").text(result);
             console.log('sellItem', result);
         } catch(err) {
             console.log(err.message);
@@ -225,12 +231,12 @@ App = {
     
     buyItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             let value = Number(prompt("Please enter value to send in ether"));
             if (value > 0) {
                 const walletValue = web3.toWei(value, "ether");
                 const result = await instance.buyItem(App.upc, {value: walletValue});
-                $("#ftc-item").text(result);
                 console.log('buyItem', result);
             }
         } catch(err) {
@@ -240,9 +246,9 @@ App = {
 
     sendItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.sendItem(App.upc);
-            $("#ftc-item").text(result);
             console.log('sendItem', result);
         } catch(err) {
             console.log(err.message);
@@ -251,9 +257,9 @@ App = {
 
     receiveItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.receiveItem(App.upc);
-            $("#ftc-item").text(result);
             console.log('receiveItem', result);
         } catch(err) {
             console.log(err.message);
@@ -262,9 +268,9 @@ App = {
     
     sendItemToCut: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.sendItemToCut(App.upc, App.masterjeweler);
-            $("#ftc-item").text(result);
             console.log('sendItemToCut', result);
         } catch(err) {
             console.log(err.message);
@@ -273,9 +279,9 @@ App = {
 
     receiveItemToCut: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.receiveItemToCut(App.upc);
-            $("#ftc-item").text(result);
             console.log('receiveItemToCut', result);
         } catch(err) {
             console.log(err.message);
@@ -284,9 +290,9 @@ App = {
     
     cutItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.cutItem(App.upc);
-            $("#ftc-item").text(result);
             console.log('cutItem', result);
         } catch(err) {
             console.log(err.message);
@@ -295,9 +301,9 @@ App = {
     
     returnCutItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.returnCutItem(App.upc);
-            $("#ftc-item").text(result);
             console.log('returnCutItem', result);
         } catch(err) {
             console.log(err.message);
@@ -306,9 +312,9 @@ App = {
     
     receiveCutItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.receiveCutItem(App.upc);
-            $("#ftc-item").text(result);
             console.log('receiveCutItem', result);
         } catch(err) {
             console.log(err.message);
@@ -317,10 +323,10 @@ App = {
     
     markForPurchasing: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             let productPrice = web3.toWei(App.productPrice, "ether");
             const result = await instance.markForPurchasing(App.upc, productPrice);
-            $("#ftc-item").text(result);
             console.log('markForPurchasing', result);
         } catch(err) {
             console.log(err.message);
@@ -329,9 +335,9 @@ App = {
 
     sendItemForPurchasing: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.sendItemForPurchasing(App.upc, App.retailer);
-            $("#ftc-item").text(result);
             console.log('sendItemForPurchasing', result);
         } catch(err) {
             console.log(err.message);
@@ -340,9 +346,9 @@ App = {
     
     receiveItemForPurchasing: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.receiveItemForPurchasing(App.upc);
-            $("#ftc-item").text(result);
             console.log('receiveItemForPurchasing', result);
         } catch(err) {
             console.log(err.message);
@@ -351,9 +357,9 @@ App = {
     
     putUpForPurchasing: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.putUpForPurchasing(App.upc);
-            $("#ftc-item").text(result);
             console.log('putUpForPurchasing', result);
         } catch(err) {
             console.log(err.message);
@@ -362,12 +368,12 @@ App = {
 
     purchaseItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             let value = Number(prompt("Please enter value to send in ether"));
             if (value > 0) {
                 const walletValue = web3.toWei(value, "ether");
                 const result = await instance.purchaseItem(App.upc, {value: walletValue});
-                $("#ftc-item").text(result);
                 console.log('purchaseItem', result);
             }
         } catch(err) {
@@ -377,40 +383,37 @@ App = {
 
     fetchItem: async (event) => {
         try {
+            event.preventDefault();
             const instance = await App.contracts.SupplyChain.deployed();
             const result = await instance.fetchItem(App.upc);
-            $("#ftc-item").text(result);
             console.log('fetchItem', result);
         } catch(err) {
             console.log(err.message);
         };
     },
 
-    fetchItemBufferOne: function () {
+    fetchItemBufferOne: async () => {
         App.upc = $('#upc').val();
-        console.log('upc',App.upc);
-
-        App.contracts.SupplyChain.deployed().then(function(instance) {
-          return instance.fetchItemBufferOne(App.upc);
-        }).then(function(result) {
-          $("#ftc-item").text(result);
-          console.log('fetchItemBufferOne', result);
-        }).catch(function(err) {
+        console.log('upc', App.upc);
+        try {
+            const instance = await App.contracts.SupplyChain.deployed();
+            const result = await instance.fetchItemBufferOne.call(App.upc);
+            App.consoleLogfetchItemBufferOne(result);
+            App.updateFieldsBufferOne(result);
+        } catch(err) {
           console.log(err.message);
-        });
+        };
     },
 
-    fetchItemBufferTwo: function () {
-                        
-        App.contracts.SupplyChain.deployed().then(function(instance) {
-          return instance.fetchItemBufferTwo.call(App.upc);
-        }).then(function(result) {
-          $("#ftc-item").text(result);
-          console.log('fetchItemBufferTwo', result);
-          console.log(result[4].toString());
-        }).catch(function(err) {
+    fetchItemBufferTwo: async () => {
+        try {                
+            const instance = await App.contracts.SupplyChain.deployed();
+            let result = await instance.fetchItemBufferTwo.call(App.upc);
+            App.consoleLogfetchItemBufferTwo(result);
+            App.updateFieldsBufferTwo(result);
+        } catch(err) {
           console.log(err.message);
-        });
+        };
     },
 
     fetchEvents: function () {
@@ -431,7 +434,77 @@ App = {
         }).catch(function(err) {
           console.log(err.message);
         });
-        
+    },
+    
+    uploadHash: async(hash) => {
+        try {
+            const instance = await App.contracts.SupplyChain.deployed();
+            const result = await instance.uploadHash(App.upc, hash);
+            console.log('uploadHash', result);
+        } catch(err) {
+            console.log
+            console.log(err.message);
+        };
+    },
+
+    readHash: async(event) => {
+        try {
+            event.preventDefault();
+            const instance = await App.contracts.SupplyChain.deployed();
+            const result = await instance.readHash.call(App.upc);
+            $('#selectedIpfsFile').val(result);
+            console.log('readHash', result);
+        } catch(err) {
+            console.log(err.message);
+        }
+    },
+
+    consoleLogfetchItemBufferOne: (result) => {
+        console.log('sku:' + Number(result[0]));
+        console.log('upc:' + Number(result[1]));
+        console.log('owner:' + result[2]);
+        console.log('miner:' + result[3]);
+        console.log('minerName:' + result[4]);
+        console.log('mineInformation:' + result[5]);
+        console.log('mineLatitude:' + result[6]);
+        console.log('mineLongitude:' + result[7]);
+    },
+
+    consoleLogfetchItemBufferTwo: (result) => {
+        console.log('sku:' + Number(result[0]));
+        console.log('upc:' + Number(result[1]));
+        console.log('productID:' + Number(result[2]));
+        console.log('itemNotes:' + result[3]);
+        console.log('itemPrice:' + web3.fromWei(result[4], "ether"));
+        console.log('productPrice:' + web3.fromWei(result[5], "ether"));
+        console.log('itemState:' + Number(result[6]));
+        console.log('manufacturer:' + result[7]);
+        console.log('masterjeweler:' + result[8]);
+        console.log('retailer:' + result[9]);
+        console.log('customer:' + result[10]);
+    },
+
+    updateFieldsBufferOne: (result) => {
+        $("#sku").val(Number(result[0]));
+        $("#upc").val(Number(result[1]));
+        $("#ownerID").val(result[2]);
+        $("#miner").val(result[3]);
+        $("#minerName").val(result[4]);
+        $("#mineInformation").val(result[5]);
+        $("#mineLatitude").val(result[6]);
+        $("#mineLongitude").val(result[7]);
+    },
+
+    updateFieldsBufferTwo: (result) => {
+        $("#sku").val(Number(result[0]));
+        $("#upc").val(Number(result[1]));
+        $("#itemNotes").val(result[3]);
+        $("#itemPrice").val(web3.fromWei(result[4], "ether"));
+        $("#productPrice").val(web3.fromWei(result[5], "ether"));
+        $("#manufacturer").val(result[7]);
+        $("#masterjeweler").val(result[8]);
+        $("#retailer").val(result[9]);
+        $("#customer").val(result[10]);
     }
 };
 

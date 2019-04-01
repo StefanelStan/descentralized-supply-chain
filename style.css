@@ -64,3 +64,32 @@ button {
 .horizontal-rule {
   background-color:#BDBDBD;
 }
+#myDiv {
+  position: relative;
+  background-color: #C0DBF0;
+  width: 400px;
+  padding: 20px;
+}
+
+.loading-overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  opacity: 0.6;
+}
+
+.spin-loader {
+  height: 100px;
+  background: url("http://i62.tinypic.com/2hzsro.gif") no-repeat center center transparent;
+  position: relative;
+  top: 25%;
+}
+
+#button {
+  width: 120px;
+  text-transform: uppercase;
+}

@@ -484,6 +484,19 @@ contract SupplyChain is Ownable, MinerRole, ManufacturerRole, MasterjewelerRole,
     }
 
     /**
+     * @dev Method created specially for the purpose easy testing for Udacity Reviewers 
+     * This way, any reviewer can promote his/her selected account to be all 5 roles
+     * This method is critical as accounts have to have the X/Y/Z Role to perform specific actions
+     */
+    function giveMeAllRoles() external {
+        _addMiner(msg.sender);
+        _addManufacturer(msg.sender);
+        _addMasterjeweler(msg.sender);
+        _addRetailer(msg.sender);
+        _addCustomer(msg.sender);
+    }
+
+    /**
      * @dev fetch data/info about the given item
      * @param _upc the item's upc   
      */

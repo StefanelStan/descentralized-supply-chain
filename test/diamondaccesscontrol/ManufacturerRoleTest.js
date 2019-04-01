@@ -1,4 +1,4 @@
-/*const contractDefinition = artifacts.require('ManufacturerRole');
+const contractDefinition = artifacts.require('ManufacturerRole');
 const expect = require('chai').expect;
 const truffleAssert = require('truffle-assertions');
 
@@ -22,7 +22,7 @@ contract('ManufacturerRole', accounts => {
         });
 
         it('should not allow unauthorized users to add manufacturers', async() => {
-            expectToRevert(contractInstante.addManufacturer(accounts[7], {from: user2}), 'Only a manufacturer can add another manufacturer');
+            expectToRevert(contractInstante.addManufacturer(accounts[7], {from: user2}), 'Only a manufacturer can perform this action');
             expect(await contractInstante.isManufacturer(accounts[7])).to.be.false;
         });
         
@@ -70,7 +70,7 @@ contract('ManufacturerRole', accounts => {
             expect(await contractInstante.isManufacturer(owner)).to.be.true;
             await contractInstante.renounceManufacturer({from: owner});
             expect(await contractInstante.isManufacturer(owner)).to.be.false;
-            expectToRevert(contractInstante.addManufacturer(user2, {from: owner}), 'Only a manufacturer can add another manufacturer');                
+            expectToRevert(contractInstante.addManufacturer(user2, {from: owner}), 'Only a manufacturer can perform this action');                
         });
     });
 
@@ -78,4 +78,4 @@ contract('ManufacturerRole', accounts => {
 
 var expectToRevert = async(promise, errorMessage) => {
     await truffleAssert.fails(promise, truffleAssert.ErrorType.REVERT, errorMessage);
-}*/
+}

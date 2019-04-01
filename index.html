@@ -7,6 +7,8 @@
     <title>Fair Trade Diamond Jewelry</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- loading the minified version -->
+    <script src="https://unpkg.com/ipfs-api@9.0.0/dist/index.js"></script>
 </head>
 
 <body>
@@ -18,19 +20,32 @@
 
     <div id="ftc-harvest">
         <h2>Product Overview</h2>
+        
         <div class="form-group">
             SKU
             <br>
-            <input class="input-field" type="number" id="sku" name="sku" value="0"><br>
+            <input class="input-field" type="number" id="sku" name="sku" value="0" disabled="true"><br>
             UPC
             <br>
             <input type="number" id="upc" name="upc" value="0"><br>
             Current Owner ID
             <br>
-            <input type="text" id="ownerID" name="ownerID" value="0x000000000000000000000000000" size="50" disabled="true"><br>
+            <input type="text" id="ownerID" name="ownerID" value="0x0000000000000000000000000000000000000000" size="50" disabled="true"><br>
+            IPFS Hash
+            <br>
+            <input type="text" id="selectedIpfsFile" data-id="24" name="" value="Select [File] and [Upload]" size="50" disabled="true"><br>
+            <div class="loading-overlay">
+                <div class="spin-loader"></div>
+            </div>
             <div class="button-div">
+                <button class="btn-fetchOne" type="button" data-id="0">Give me ALL Roles</button>
                 <button class="btn-fetchOne" type="button" data-id="17">Fetch Data 1</button>
                 <button class="btn-fetchTwo" type="button" data-id="18">Fetch Data 2</button>
+                <button class="btn-uploadHash" type="button" id="selectBtn" data-id="19">SelectIPFSPicture</button>
+                <input id="file-input" type="file" name="name" style="display: none;"/>
+                <button class="btn-readHash" type="button" id="uploadBtn" onclick="uploadToIpfs()"> UploadIPFSHash</button>
+                <button class="btn-readHash" type="button" data-id="20">ReadIPFSHash</button>
+            
             </div>
         </div>
         <div class="form-break"></div>
@@ -38,7 +53,7 @@
         <div class="form-group">
             Miner
             <br>
-            <input type="text" id="miner" name="miner" value="0x99c289eb2aacec289631a5ddf62cf27a63d4494f"
+            <input type="text" id="miner" name="miner" value="0x0000000000000000000000000000000000000000" disabled="true"
                 size="50"><br>
             Miner Name
             <br>
@@ -55,7 +70,7 @@
             <br>
             Item Notes
             <br>
-            <input type="text" id="itemNotes" name="itemNotes" value="Shiniest Diamond" size="60"><br>
+            <input type="text" id="itemNotes" name="itemNotes" value="Shiniest Diamond"><br>
             <button class="btn-mine" type="button" data-id="1">1.Mine</button>
             <button class="btn-sell" type="button" data-id="2">2.Sell</button>
             <button class="btn-buy" type="button" data-id="3">3.Buy</button>
@@ -75,7 +90,7 @@
             <input type="number" id="itemPrice" name="itemPrice" value="1">ETH<br>
             Manufacturer ID
             <br>
-            <input type="text" id="manufacturer" name="manufacturer" value="0x0000000000000000000000000000000000000000"
+            <input type="text" id="manufacturer" name="manufacturer" disabled="true" value="0x0000000000000000000000000000000000000000"
                 size="50"><br>
             Masterjeweler ID
             <br>
@@ -90,7 +105,7 @@
                 size="50"><br>
             Customer ID
             <br>
-            <input type="text" id="customer" name="customer" value="0x0000000000000000000000000000000000000000"
+            <input type="text" id="customer" name="customer" disabled="true" value="0x0000000000000000000000000000000000000000"
                 size="50"><br>
             <br>
             <button class="btn-markForPurchase" type="button" data-id="11">11.MarkForPurchasing</button>
@@ -112,11 +127,35 @@
         <br>
         <hr>
     </div>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- <script src="js/web3.min.js"></script> -->
     <script src="js/truffle-contract.js"></script>
     <script src="js/app.js"></script>
+    <script type="text/javascript">
+        function uploadToIpfs(){
+            const reader = new FileReader();
+            $('.loading-overlay').show();
+            reader.onloadend = async () => {
+                const myipfs = window.IpfsApi({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+                let content = myipfs.Buffer(reader.result);
+                let result = myipfs.files.add(content, async (err, result) => {
+                    if(err) {
+                        console.error(err);
+                        $('.loading-overlay').hide();
+                        return;
+                    }
+                    await App.uploadHash(result[0].hash);
+                    console.log(`https://ipfs.io/ipfs/${result[0].hash}`);
+                    document.getElementById('selectedIpfsFile').value = result[0].hash;
+                    $('.loading-overlay').hide();
+                    return;
+                });
+            }
+
+            const photo = document.getElementById("file-input");
+            reader.readAsArrayBuffer(photo.files[0]);
+        }
+    </script>
 </body>
 
 </html>

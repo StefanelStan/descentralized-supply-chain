@@ -1,4 +1,4 @@
-/*const contractDefinition = artifacts.require('MasterjewelerRole');
+const contractDefinition = artifacts.require('MasterjewelerRole');
 const expect = require('chai').expect;
 const truffleAssert = require('truffle-assertions');
 
@@ -23,7 +23,7 @@ contract('MasterjewelerRole', accounts => {
         });
 
         it('should not allow unauthorized users to add Masterjewelers', async() => {
-            expectToRevert(contractInstante.addMasterjeweler(accounts[7], {from: user2}), 'Only a masterjeweler can add another masterjeweler');
+            expectToRevert(contractInstante.addMasterjeweler(accounts[7], {from: user2}), 'Only a masterjeweler can perform this action');
             expect(await contractInstante.isMasterjeweler(accounts[7])).to.be.false;
         });
         
@@ -67,7 +67,7 @@ contract('MasterjewelerRole', accounts => {
             expect(await contractInstante.isMasterjeweler(owner)).to.be.true;
             await contractInstante.renounceMasterjeweler({from: owner});
             expect(await contractInstante.isMasterjeweler(owner)).to.be.false;
-            expectToRevert(contractInstante.addMasterjeweler(user2, {from: owner}), 'Only a masterjeweler can add another masterjeweler');                
+            expectToRevert(contractInstante.addMasterjeweler(user2, {from: owner}), 'Only a masterjeweler can perform this action');                
         });
     });
 
@@ -75,4 +75,4 @@ contract('MasterjewelerRole', accounts => {
 
 var expectToRevert = async(promise, errorMessage) => {
     await truffleAssert.fails(promise, truffleAssert.ErrorType.REVERT, errorMessage);
-}*/
+}

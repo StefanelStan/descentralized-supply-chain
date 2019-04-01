@@ -27,7 +27,7 @@ contract CustomerRole {
     modifier onlyCustomer() {
         require(isCustomer(msg.sender), "Only a customer can perform this action");    
         _;
-    } 
+    }
 
     // Define a function 'isCustomer' to check this role
     function isCustomer(address account) public view returns (bool) {

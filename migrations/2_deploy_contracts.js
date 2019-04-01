@@ -4,7 +4,7 @@ var ManufacturerRole = artifacts.require("./ManufacturerRole.sol");
 var MasterjewelerRole = artifacts.require("./MasterjewelerRole.sol");
 var RetailerRole = artifacts.require("./RetailerRole.sol");
 var CustomerRole = artifacts.require("./CustomerRole.sol");
-//var SupplyChain = artifacts.require("./SupplyChain.sol");
+var SupplyChain = artifacts.require("./SupplyChain.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(MinerRole);
@@ -12,5 +12,5 @@ module.exports = function(deployer) {
   deployer.deploy(MasterjewelerRole);
   deployer.deploy(RetailerRole);
   deployer.deploy(CustomerRole);
- // deployer.deploy(SupplyChain);
+  deployer.deploy(SupplyChain);
 };

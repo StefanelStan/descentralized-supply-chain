@@ -25,12 +25,13 @@ contract('SupplyChain', accounts => {
     const zeroAddress = '0x0000000000000000000000000000000000000000';
     let contractInstance;
 
-    console.log("ganache-cli accounts used here...")
-    console.log("Contract Owner: accounts[0] ", accounts[0])
-    console.log("Farmer: accounts[1] ", accounts[1])
-    console.log("Distributor: accounts[2] ", accounts[2])
-    console.log("Retailer: accounts[3] ", accounts[3])
-    console.log("Consumer: accounts[4] ", accounts[4])
+    console.log("ganache-cli accounts used here...");
+    console.log("Contract Owner: accounts[0] ", accounts[0]);
+    console.log("Miner: accounts[1] ", accounts[1]);
+    console.log("Manufacturer: accounts[2] ", accounts[2]);
+    console.log("Masterjeweler: accounts[3] ", accounts[3]);
+    console.log("Retailer: accounts[4] ", accounts[4]);
+    console.log("Customer: accounts[5] ", accounts[5]);
 
     describe('Test suite: contract ownership, transfer and renounce', () => {
         let currentOwner;
@@ -304,7 +305,7 @@ contract('SupplyChain', accounts => {
             assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 4, manufacturer, zeroAddress, zeroAddress, zeroAddress);
         });
 
-        it('should not allow the manufacturer to receive the same item twice', async () => {
+        it('should NOT allow the manufacturer to receive the same item twice', async () => {
             expectToRevert(contractInstance.receiveItem(upc, {from: manufacturer}), 'Item state is not Sent');
         });
     });
@@ -340,7 +341,7 @@ contract('SupplyChain', accounts => {
             expectToRevert(contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer}), 'The given address is not a Masterjeweler Role');
         });
 
-        it('should allow manufacturer to receive item, emit event and change state of item', async () => {
+        it('should allow the manufacturer to sendItemToCut, emit event and change state of item', async () => {
             //finish this 24/03/2019 23:36 add masterjeweler to MasterjewelerRole by the onwer
             await contractInstance.addMasterjeweler(masterjeweler, {from: owner});
             let tx = await contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer});
@@ -353,7 +354,7 @@ contract('SupplyChain', accounts => {
             assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, 0, 5, manufacturer, masterjeweler, zeroAddress, zeroAddress);
         });
 
-        it('should not allow the manufacturer to receive the same item twice', async () => {
+        it('should NOT allow the manufacturer to sendItemToCut the same item twice', async () => {
             expectToRevert(contractInstance.sendItemToCut(upc, masterjeweler, {from: manufacturer}), 'Item state is not Received');
         });
     });
@@ -543,7 +544,7 @@ contract('SupplyChain', accounts => {
             expectToRevert(contractInstance.receiveCutItem(upc, {from: customer}), 'Only the authorized user/address can perform this');
         });
 
-        it('should allow masterjeweler to receiveCutItem, emit event and change state of item', async () => {
+        it('should allow manufacturer to receiveCutItem, emit event and change state of item', async () => {
             let tx = await contractInstance.receiveCutItem(upc, {from: manufacturer});
             truffleAssert.eventEmitted(tx, 'ReceivedFromCutting', (ev) => {
                 return expect(Number(ev.upc)).to.equal(upc);
@@ -710,7 +711,7 @@ contract('SupplyChain', accounts => {
             assertItemHasProperties(resultBufferTwo, upc, upc, 2 * upc, productNotes, itemPrice, productPrice, 12, manufacturer, masterjeweler, retailer, zeroAddress);
         });
 
-        it('should not allow the retailer to receiveItemForPurchasing the same item twice', async () => {
+        it('should NOT allow the retailer to receiveItemForPurchasing the same item twice', async () => {
             expectToRevert(contractInstance.receiveItemForPurchasing(upc, { from: retailer }), 'Item state is not SentForPurchasing');
         });
     });
