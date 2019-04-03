@@ -127,8 +127,7 @@ App = {
     },
 
     handleChange: async (event) => {
-        var processId = parseInt($(event.target).data('id'));
-        if (processId == 24) {
+        if (event.target.id == "file-input") {
             const file = event.target.files[0];
             $('#selectedIpfsFile').val(file.name);
             console.log(file);
